@@ -9,7 +9,7 @@ Usage:
         python3.5 pynotbot.py <url> <interval (in seconds)> <receiver email for notification> <bot's email> <bot's email password>
 
 Example:
-        python3.5 pynotbot.py google.com 5 someone@somewhere.com pynotbot@somewhere.com password
+        python3.5 pynotbot.py http://www.google.com 5 someone@somewhere.com pynotbot@somewhere.com password
 
     Supports only gmail for now.""")
     quit()
@@ -44,7 +44,7 @@ def notify(from_addr, to_addr, url, server):
     ])
     server.sendmail(from_addr, to_addr, msg)
 
-def notifier(from_addr, to_addr, url, interval, server):
+def notifier(from_addr, password, to_addr, url, interval):
     print("Notifier started on: " + url + ". Checking every " + str(interval) + " seconds.")
     page_source = urllib.request.urlopen(url).read()
 
@@ -52,6 +52,12 @@ def notifier(from_addr, to_addr, url, interval, server):
         new_page_source = urllib.request.urlopen(url).read()
         if page_source != new_page_source:
             page_source = new_page_source
+
+            server = smtplib.SMTP('smtp.gmail.com:587')
+            server.starttls()
+
+            server.login(from_addr, password)
             notify(from_addr, to_addr, url, server)
+            server.quit()
 
         time.sleep(interval)
